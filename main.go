@@ -24,64 +24,35 @@ type Node struct {
 	Port     string `yaml:"port"`
 }
 
+func (c *config) load() {
+	d, err := ioutil.ReadFile("config.yaml")
+	if err == nil {
+		if err := yaml.Unmarshal(d, &c); err != nil {
+			panic(err)
+		}
+	}
+}
+
 func main() {
 	cfg := &config{}
 
 	defaultCfg := &config{
-		Test: "DefaultConfigTest",
-		Name: "DefaultConfigName",
+		Test: "TestValueFromDefaultStruct",
+		Name: "NameValueFromDefaultStruct",
 		Node: Node{
 			Hostname: "localhost",
-			Port:     "0000",
+			Port:     "8080",
 		},
 	}
 
-	d, err := ioutil.ReadFile("config.yaml")
-	if err == nil {
-		if err := yaml.Unmarshal(d, &cfg); err != nil {
-			panic(err)
-		}
-	}
+	cfg.load()
 
 	// set default values for undefined values in the config file.
 	if err := mergo.Merge(cfg, defaultCfg); err != nil {
 		panic(err)
 	}
 
-	flags := []cli.Flag{
-		&cli.StringFlag{
-			Name:        "test",
-			EnvVars:     []string{"APP_TEST"},
-			Required:    false,
-			Hidden:      false,
-			Value:       cfg.Test,
-			Destination: &cfg.Test,
-		},
-		&cli.StringFlag{
-			Name:        "name",
-			EnvVars:     []string{"APP_NAME"},
-			Required:    false,
-			Hidden:      false,
-			Value:       cfg.Name,
-			Destination: &cfg.Name,
-		},
-		&cli.StringFlag{
-			Name:        "hostname",
-			EnvVars:     []string{"APP_NODE_HOSTNAME"},
-			Required:    false,
-			Hidden:      false,
-			Value:       cfg.Node.Hostname,
-			Destination: &cfg.Node.Hostname,
-		},
-		&cli.StringFlag{
-			Name:        "port",
-			EnvVars:     []string{"APP_NODE_HOSTNAME"},
-			Required:    false,
-			Hidden:      false,
-			Value:       cfg.Node.Port,
-			Destination: &cfg.Node.Port,
-		},
-	}
+	flags := getFlagset(cfg)
 
 	app := cli.App{
 		Commands: []*cli.Command{
@@ -102,4 +73,42 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		panic(err)
 	}
+}
+
+func getFlagset(cfg *config) []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringFlag{
+			Name:        "test",
+			EnvVars:     []string{"TEST"},
+			Required:    false,
+			Hidden:      false,
+			Value:       cfg.Test,
+			Destination: &cfg.Test,
+		},
+		&cli.StringFlag{
+			Name:        "name",
+			EnvVars:     []string{"NAME"},
+			Required:    false,
+			Hidden:      false,
+			Value:       cfg.Name,
+			Destination: &cfg.Name,
+		},
+		&cli.StringFlag{
+			Name:        "hostname",
+			EnvVars:     []string{"NODE_HOSTNAME"},
+			Required:    false,
+			Hidden:      false,
+			Value:       cfg.Node.Hostname,
+			Destination: &cfg.Node.Hostname,
+		},
+		&cli.StringFlag{
+			Name:        "port",
+			EnvVars:     []string{"NODE_HOSTNAME"},
+			Required:    false,
+			Hidden:      false,
+			Value:       cfg.Node.Port,
+			Destination: &cfg.Node.Port,
+		},
+	}
+	return flags
 }
