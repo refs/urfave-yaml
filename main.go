@@ -15,7 +15,13 @@ import (
 
 type config struct {
 	Test string `yaml:"test"`
-	Name string
+	Name string `yaml:"name"`
+	Node Node   `yaml:"node"`
+}
+
+type Node struct {
+	Hostname string `yaml:"hostname"`
+	Port     string `yaml:"port"`
 }
 
 func main() {
@@ -24,9 +30,13 @@ func main() {
 	defaultCfg := &config{
 		Test: "DefaultConfigTest",
 		Name: "DefaultConfigName",
+		Node: Node{
+			Hostname: "localhost",
+			Port:     "0000",
+		},
 	}
 
-	d, err := ioutil.ReadFile("configs.yaml")
+	d, err := ioutil.ReadFile("config.yaml")
 	if err == nil {
 		if err := yaml.Unmarshal(d, &cfg); err != nil {
 			panic(err)
@@ -54,6 +64,22 @@ func main() {
 			Hidden:      false,
 			Value:       cfg.Name,
 			Destination: &cfg.Name,
+		},
+		&cli.StringFlag{
+			Name:        "hostname",
+			EnvVars:     []string{"APP_NODE_HOSTNAME"},
+			Required:    false,
+			Hidden:      false,
+			Value:       cfg.Node.Hostname,
+			Destination: &cfg.Node.Hostname,
+		},
+		&cli.StringFlag{
+			Name:        "port",
+			EnvVars:     []string{"APP_NODE_HOSTNAME"},
+			Required:    false,
+			Hidden:      false,
+			Value:       cfg.Node.Port,
+			Destination: &cfg.Node.Port,
 		},
 	}
 
