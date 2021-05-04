@@ -60,7 +60,6 @@ func main() {
 				Name:      "run",
 				UsageText: "runs an example app",
 				Action: func(context *cli.Context) error {
-					fmt.Printf("Action: %v\n", context.Value("test"))
 					d, _ := json.MarshalIndent(cfg, "", "  ")
 					fmt.Printf("Action: %+v", string(d))
 					return nil
@@ -103,7 +102,7 @@ func getFlagset(cfg *config) []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:        "port",
-			EnvVars:     []string{"NODE_HOSTNAME"},
+			EnvVars:     []string{"NODE_PORT"},
 			Required:    false,
 			Hidden:      false,
 			Value:       cfg.Node.Port,
